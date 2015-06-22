@@ -40,7 +40,7 @@ window.onscroll = function() { window.scrollTo(0, 0);};
         perso = new Personnage(1, meshPerso, 0, 1, 0, 50, 50, 0, 0, 5.0, 0);
         perso.sphere.mesh.position.set( 250, 250 );
 
-        var floorTexture = new THREE.ImageUtils.loadTexture( '/textures/TextureMetal.png' );
+        var floorTexture = new THREE.ImageUtils.loadTexture( '/static/textures/TextureMetal.png' );
         floorTexture.wrapS = floorTexture.wrapT = THREE.RepeatWrapping;
         floorTexture.repeat.set( 24, 24 );
         var floorMaterial = new THREE.MeshBasicMaterial( { map: floorTexture, side: THREE.DoubleSide } );
@@ -56,7 +56,7 @@ window.onscroll = function() { window.scrollTo(0, 0);};
                 if (carte.cases.get(i,j) == Tile.OBSTACLE)
                 {
                     var cubeGeometry = new THREE.BoxGeometry( 100, 100, 100 );
-                    var crateTexture = new THREE.ImageUtils.loadTexture( '/textures/Caisse.gif' );
+                    var crateTexture = new THREE.ImageUtils.loadTexture( '/static/textures/Caisse.gif' );
                     var crateMaterial = new THREE.MeshBasicMaterial( { map: crateTexture } );
                     var crate = new THREE.Mesh( cubeGeometry.clone(), crateMaterial );
                     crate.position.set(50+100*j, 50+100*i, 50);
