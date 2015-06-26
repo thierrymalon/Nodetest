@@ -1,3 +1,4 @@
+(function() {
 var Client = function() {
     this.socket = io();
 
@@ -129,3 +130,6 @@ var Client = function() {
         renderer.render( scene, camera );
     }
 }
+
+var client = new Client();
+})();
