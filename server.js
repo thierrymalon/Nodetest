@@ -6,6 +6,7 @@ var app = express();
 // Socket.io initialization
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
+require('./socket.js')(io);
 
 var bodyParser = require('body-parser');
 var session = require('cookie-session');

@@ -1,5 +1,7 @@
-var Personnage = function(id, elementalMesh, direction, niveau, exp, pdvMax, pdvRestants, puissance, resistance, vitesse, sorts)
+var Personnage = function(isPlayer, id, elementalMesh, direction, niveau, exp, pdvMax, pdvRestants, puissance, resistance, vitesse, sorts, socket)
 {
+    this.isConnected = isPlayer;
+    this.isPlayer = isPlayer;
     this.id = id;
     this.sphere = elementalMesh;
     this.direction = direction;
@@ -12,6 +14,7 @@ var Personnage = function(id, elementalMesh, direction, niveau, exp, pdvMax, pdv
     this.resistance = resistance;
     this.vitesse = vitesse;
     this.sorts = sorts;
+    this.socket = socket;
 
     this.motion = new Motion();
     this.moving = false;
@@ -29,6 +32,7 @@ Personnage.prototype.changeSort = function(sort,idxSort) {
 }
 
 Personnage.prototype.onKeyEvent = function(event, toSet) {
+    var currentDirection = this.motion.direction();
     switch (event.keyCode) {
         // Azerty keyboards
         case 38: this.motion.moveUp    = toSet; break; // Up
@@ -38,14 +42,23 @@ Personnage.prototype.onKeyEvent = function(event, toSet) {
 
         case 65: this.action.keyA = toSet; break; // A key pressed
     }
+    if (currentDirection != this.motion.direction())
+    {
+        console.log("change direction : " + currentDirection + " to " + this.motion.direction());
+        this.socket.emit("move", this.id, this.sphere.mesh.position.x, this.sphere.mesh.position.y, this.motion.direction());
+    }
 }
 
 Personnage.prototype.onKeyDown = function(event) {
-    this.onKeyEvent(event, true);
+    if (this.isPlayer) {
+        this.onKeyEvent(event, true);
+    }
 }
 
 Personnage.prototype.onKeyUp = function(event) {
-    this.onKeyEvent(event, false);
+    if (this.isPlayer) {
+        this.onKeyEvent(event, false);
+    }
 }
 
 Personnage.prototype.nextStep = function(camera, map) {
@@ -115,9 +128,11 @@ Personnage.prototype.nextStep = function(camera, map) {
             }
         }
 
-        camera.position.x = nextPosition.x;
-        camera.position.y = nextPosition.y-60;
-        camera.position.z = nextPosition.z+350;
+        if (this.isPlayer) {
+            camera.position.x = nextPosition.x;
+            camera.position.y = nextPosition.y-60;
+            camera.position.z = nextPosition.z+350;
+        }
 //        camera.lookAt(nextPosition.x, nextPosition.y+20, nextPosition.z);
     }
 }
