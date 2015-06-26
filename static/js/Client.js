@@ -4,6 +4,7 @@ var Client = function() {
 
     console.log("Connected");
 
+        var scene, camera, renderer, perso, persos, carte;
     var self = this;
     this.socket.on("msg", function(msg, msg2, msg3) {
         console.log("msg received : " + msg + " " + msg2);
@@ -11,7 +12,6 @@ var Client = function() {
         // Disable scrolling
         window.onscroll = function() { window.scrollTo(0, 0);};
 
-        var scene, camera, renderer, perso, persos, carte;
 
         init(msg2, self.socket, msg3);
         animate();
