@@ -44,7 +44,6 @@ Personnage.prototype.onKeyEvent = function(event, toSet) {
     }
     if (currentDirection != this.motion.direction())
     {
-        console.log("change direction : " + currentDirection + " to " + this.motion.direction());
         this.socket.emit("move", this.id, this.sphere.mesh.position.x, this.sphere.mesh.position.y, this.motion.direction());
     }
 }

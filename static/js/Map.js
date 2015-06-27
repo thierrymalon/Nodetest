@@ -1,6 +1,6 @@
 var Map = function() {
-    this.height = 17;
-    this.width = 17;
+    this.height = 18;
+    this.width = 18;
     this.cases = new Matrix(this.height,this.width);
     for (var i = 0; i<this.height; i++) {
         for (var j = 0; j<this.width; j++) {

@@ -7,20 +7,18 @@ var Client = function() {
     var scene, camera, renderer, perso, persos, carte;
 
     var self = this;
-    this.socket.on("msg", function(msg, msg2, msg3) {
-        console.log("msg received : " + msg + " " + msg2);
+    this.socket.on("msg", function(msg, msg2, msg3, msg4, msg5, msg6, msg7, msg8) {
         self.socket.emit("toto", "I received your stuff !");
         // Disable scrolling
         window.onscroll = function() { window.scrollTo(0, 0);};
 
 
-        init(msg2, self.socket, msg3);
+        init(msg, self.socket, msg2, msg3, msg4, msg5, msg6, msg7, msg8);
         animate();
 
     });
 
-
-    function init(id, socket, connectes) {
+    function init(id, socket, colorPerso, xp, yp, connectes, xs, ys, colorsPerso) {
 
     carte = new Map();
     carte.generateTest1();
@@ -46,31 +44,31 @@ var Client = function() {
     scene.add(light);
 
     var elementalSpherePerso = new ElementalSphere(Element.FEU, 16);
-    var meshPerso = new ElementalMesh(elementalSpherePerso, new THREE.Vector3(0,0,16), 0xff0000, scene);
+    var meshPerso = new ElementalMesh(elementalSpherePerso, new THREE.Vector3(0,0,16), colorPerso, scene);
 
     perso = new Personnage(true, id, meshPerso, 0, 1, 0, 50, 50, 0, 0, 5.0, 0, socket);
-    perso.sphere.mesh.position.set( 250, 250, 0 );
+    perso.sphere.mesh.position.set( xp, yp, 0 );
 
     persos = new Array(50);
     for (var i = 0; i < 50; i++) {
         var elementalSphereOther = new ElementalSphere(Element.FEU, 16);
-        var meshOther = new ElementalMesh(elementalSphereOther, new THREE.Vector3(0,0,16), 0xff0000, scene);
+        var meshOther = new ElementalMesh(elementalSphereOther, new THREE.Vector3(0,0,16), colorsPerso[i], scene);
         persos[i] = new Personnage(false, id, meshOther, 0, 1, 0, 50, 50, 0, 0, 5.0, 0);
         persos[i].isConnected = connectes[i];
         if (connectes[i]) {
-            persos[i].sphere.mesh.position.set( 250, 250, 0 );
+            persos[i].sphere.mesh.position.set( xs[i], ys[i], 0 );
         }
-        persos[i].sphere.mesh.position.set( 340, 340);
+//        persos[i].sphere.mesh.position.set( 340, 340);
     }
 
     var floorTexture = new THREE.ImageUtils.loadTexture( '/static/textures/TextureMetal.png' );
     floorTexture.wrapS = floorTexture.wrapT = THREE.RepeatWrapping;
     floorTexture.repeat.set( 24, 24 );
     var floorMaterial = new THREE.MeshBasicMaterial( { map: floorTexture, side: THREE.DoubleSide } );
-    var floorGeometry = new THREE.PlaneGeometry(1600, 1600);
+    var floorGeometry = new THREE.PlaneGeometry(1800, 1800);
     var floor = new THREE.Mesh(floorGeometry, floorMaterial);
-    floor.position.x = 800
-    floor.position.y = 800;
+    floor.position.x = 900;
+    floor.position.y = 900;
     //        floor.rotation.x = Math.PI / 2;
     scene.add(floor);
 
@@ -110,9 +108,15 @@ var Client = function() {
             persos[id].sphere.mesh.position.set( 0, 0, -100 );
         });
 
-        perso.socket.on("other", function(id) {
-            persos[id].isConnected = true;
-            persos[id].sphere.mesh.position.set( 250, 250, 0 );
+        perso.socket.on("other", function(id, x, y, color) {
+            if (!persos[id].isConnected) {
+                console.log("new perso");
+                var elementalSphereOther = new ElementalSphere(Element.FEU, 16);
+                var meshOther = new ElementalMesh(elementalSphereOther, new THREE.Vector3(0,0,16), color, scene);
+                persos[id] = new Personnage(false, id, meshOther, 0, 1, 0, 50, 50, 0, 0, 5.0, 0);
+                persos[id].isConnected = true;
+                persos[id].sphere.mesh.position.set( x, y, 0 );
+            }
         });
 
         perso.socket.on("move", function(id, x, y, direction) {
