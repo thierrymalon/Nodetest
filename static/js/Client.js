@@ -2,9 +2,10 @@
 var Client = function() {
     this.socket = io();
 
-    console.log("Connected");
+//    console.log("Connected");
 
-        var scene, camera, renderer, perso, persos, carte;
+    var scene, camera, renderer, perso, persos, carte;
+
     var self = this;
     this.socket.on("msg", function(msg, msg2, msg3) {
         console.log("msg received : " + msg + " " + msg2);
@@ -50,8 +51,8 @@ var Client = function() {
     perso = new Personnage(true, id, meshPerso, 0, 1, 0, 50, 50, 0, 0, 5.0, 0, socket);
     perso.sphere.mesh.position.set( 250, 250, 0 );
 
-    persos = new Array(100);
-    for (var i = 0; i < 100; i++) {
+    persos = new Array(50);
+    for (var i = 0; i < 50; i++) {
         var elementalSphereOther = new ElementalSphere(Element.FEU, 16);
         var meshOther = new ElementalMesh(elementalSphereOther, new THREE.Vector3(0,0,16), 0xff0000, scene);
         persos[i] = new Personnage(false, id, meshOther, 0, 1, 0, 50, 50, 0, 0, 5.0, 0);
@@ -121,7 +122,7 @@ var Client = function() {
         });
 
         perso.nextStep(camera, carte);
-        for (var i = 0; i < 100; i++) {
+        for (var i = 0; i < 50; i++) {
             if (persos[i].isConnected) {
                 persos[i].nextStep(camera, carte);
             }
