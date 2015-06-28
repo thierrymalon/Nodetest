@@ -4,7 +4,7 @@ var Client = function() {
 
 //    console.log("Connected");
 
-    var scene, camera, renderer, perso, persos, carte;
+    var scene, camera, renderer, perso, persos, carte, visualSpells;
 
     var self = this;
     this.socket.on("msg", function(msg, msg2, msg3, msg4, msg5, msg6, msg7, msg8) {
@@ -33,11 +33,12 @@ var Client = function() {
 
     var unmeshSpells = new Array(100);
 
-    //        var visualSpells = new Array(10000);
+    visualSpells = new Array(50);
 
-    //        for (var i = 0; i < 10000; i++) {
-    //            visualSpells[i] = new VisualSpell();
-    //        }
+    for (var i = 0; i < 500; i++) {
+        var sortBasique = new UnmeshSpell(new ElementalSphere(Element.FEU, 10),0,6,new Movement(1300,0,0,0,0,0,0,0),HealHurt.IGNO_ALLY_HURT_ENNEMY,ObstacleCollision.BLOCK,new Array, new Array, new Array, new Array, 600000);
+        visualSpells[i] = new VisualSpell(false,0,sortBasique,new THREE.Vector3(0,0,16),0x000000,scene);
+    }
 
     var light = new THREE.HemisphereLight(0xffffbb, 0x080820, 1);
     light.position.set(-1,1,-1);
@@ -46,7 +47,7 @@ var Client = function() {
     var elementalSpherePerso = new ElementalSphere(Element.FEU, 16);
     var meshPerso = new ElementalMesh(elementalSpherePerso, new THREE.Vector3(0,0,16), colorPerso, scene);
 
-    perso = new Personnage(true, id, meshPerso, 0, 1, 0, 50, 50, 0, 0, 5.0, 0, socket);
+    perso = new Personnage(true, id, meshPerso, 0, 1, 0, 50, 50, 0, 0, 5.0, 0);
     perso.sphere.mesh.position.set( xp, yp, 0 );
 
     persos = new Array(50);
@@ -55,6 +56,9 @@ var Client = function() {
         var meshOther = new ElementalMesh(elementalSphereOther, new THREE.Vector3(0,0,16), colorsPerso[i], scene);
         persos[i] = new Personnage(false, id, meshOther, 0, 1, 0, 50, 50, 0, 0, 5.0, 0);
         persos[i].isConnected = connectes[i];
+        persos[i].lastMove = new Lifetime(1);
+        persos[i].lastShoot = new Lifetime(1);
+
         if (connectes[i]) {
             persos[i].sphere.mesh.position.set( xs[i], ys[i], 0 );
         }
@@ -100,17 +104,27 @@ var Client = function() {
 
         requestAnimationFrame( animate );
 
+        if (perso.toMove) {
+            self.socket.emit("move", perso.id, perso.sphere.mesh.position.x, perso.sphere.mesh.position.y, perso.motion.direction());
+            perso.toMove = false;
+        }
+
+        if (perso.toShoot) {
+            self.socket.emit("shoot", perso.id, perso.sphere.mesh.position.x, perso.sphere.mesh.position.y, perso.direction);
+            perso.toShoot = false;
+            perso.cooldown = new Lifetime(500);
+        }
+
     //        mesh.rotation.x += 0.01;
     //        mesh.rotation.y += 0.02;
 
-        perso.socket.on("deco", function(id) {
+        self.socket.on("deco", function(id) {
             persos[id].isConnected = false;
             persos[id].sphere.mesh.position.set( 0, 0, -100 );
         });
 
-        perso.socket.on("other", function(id, x, y, color) {
+        self.socket.on("other", function(id, x, y, color) {
             if (!persos[id].isConnected) {
-                console.log("new perso");
                 var elementalSphereOther = new ElementalSphere(Element.FEU, 16);
                 var meshOther = new ElementalMesh(elementalSphereOther, new THREE.Vector3(0,0,16), color, scene);
                 persos[id] = new Personnage(false, id, meshOther, 0, 1, 0, 50, 50, 0, 0, 5.0, 0);
@@ -119,16 +133,47 @@ var Client = function() {
             }
         });
 
-        perso.socket.on("move", function(id, x, y, direction) {
-            persos[id].sphere.mesh.position.set( x, y, 0 );
-            persos[id].direction = direction;
-            persos[id].motion.setDirection(direction);
+        self.socket.on("move", function(id, x, y, direction) {
+            if (persos[id].lastMove.lifeEnds()) {
+                persos[id].lastMove = new Lifetime(3);
+                persos[id].sphere.mesh.position.set( x, y, 0 );
+                persos[id].direction = direction;
+                persos[id].motion.setDirection(direction);
+            }
+        });
+
+        self.socket.on("shoot", function(id, x, y, direction, kk) {
+            if (persos[id].lastShoot.lifeEnds()) {
+                persos[id].lastShoot = new Lifetime(10);
+                visualSpells[kk].exists = true;
+                visualSpells[kk].idOwner = id;
+                visualSpells[kk].stillEffective = true;
+                visualSpells[kk].elementalMesh.mesh.position.setX(x);
+                visualSpells[kk].elementalMesh.mesh.position.setY(y);
+                visualSpells[kk].unmeshSpell.movement.theta = direction*Math.PI/16;
+                visualSpells[kk].lifeTime = new Lifetime(1000);
+            }
         });
 
         perso.nextStep(camera, carte);
         for (var i = 0; i < 50; i++) {
             if (persos[i].isConnected) {
                 persos[i].nextStep(camera, carte);
+            }
+        }
+
+        for (var i = 0; i < 500; i++) {
+            if (visualSpells[i].exists) {
+                if (visualSpells[i].lifeTime.lifeEnds()) {
+                    visualSpells[i].exists = false;
+                    visualSpells[i].elementalMesh.mesh.position.setX(0);
+                    visualSpells[i].elementalMesh.mesh.position.setY(0);
+                }
+                else {
+                    var nextPos = Tools.sum(visualSpells[i].elementalMesh.mesh.position,Tools.mul(new THREE.Vector3(Math.cos(visualSpells[i].unmeshSpell.movement.theta), Math.sin(visualSpells[i].unmeshSpell.movement.theta), 0.0),visualSpells[i].unmeshSpell.movement.speed/100.0));
+                    visualSpells[i].elementalMesh.mesh.position.setX(nextPos.x);
+                    visualSpells[i].elementalMesh.mesh.position.setY(nextPos.y);
+                }
             }
         }
 

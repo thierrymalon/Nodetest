@@ -5,7 +5,7 @@ var VisualSpell = function(exists, idOwner, unmeshSpell, initialPos, color, scen
     this.unmeshSpell = unmeshSpell;
     this.elementalMesh = new ElementalMesh(unmeshSpell.elementalSphere, initialPos, color, scene);
     this.lifeTime = new Lifetime(unmeshSpell.timeToLive);
-};
+}
 
 VisualSpell.protoype.nextStep = function() {
     for (var i = 0; i < this.unmeshSpell.events.length; i++) {
@@ -57,5 +57,6 @@ VisualSpell.protoype.nextStep = function() {
     this.unmeshSpell.movement.phiRotationSpeed += this.unmeshSpell.movement.phiAngularAcceleration;
     this.unmeshSpell.movement.phi += this.unmeshSpell.movement.phiRotationSpeed/10000.0;
 
-    var nextPosition = Tools.sum(this.elementalMesh.mesh.position, Tools.mul(this.unmeshSpell.movement.speed/100.0), new THREE.Vector3(Math.cos(this.unmeshSpell.movement.theta), Math.sin(this.unmeshSpell.movement.phi, 0.0));
+    var nextPosition = Tools.sum(this.elementalMesh.mesh.position, Tools.mul(this.unmeshSpell.movement.speed/100.0), new THREE.Vector3(Math.cos(this.unmeshSpell.movement.theta), Math.sin(this.unmeshSpell.movement.theta), 0.0));
+    this.elementalMesh.mesh.position = nextPosition;
 }

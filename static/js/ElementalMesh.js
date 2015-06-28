@@ -1,6 +1,7 @@
 var ElementalMesh = function(elementalSphere, center, color, scene) {
     this.elementalSphere = elementalSphere;
-    var geometrySphere = new THREE.IcosahedronGeometry(elementalSphere.radius, 3);
+//    var geometrySphere = new THREE.IcosahedronGeometry(elementalSphere.radius, 3);
+    var geometrySphere = new THREE.SphereGeometry(elementalSphere.radius, 6, 6);
     for (var i = 0, j = geometrySphere.faces.length; i < j; i++) {
         geometrySphere.faces[i].color.setHex(color);
     }

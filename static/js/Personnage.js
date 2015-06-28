@@ -15,6 +15,12 @@ var Personnage = function(isPlayer, id, elementalMesh, direction, niveau, exp, p
     this.vitesse = vitesse;
     this.sorts = sorts;
     this.socket = socket;
+    this.action = false;
+
+    this.lastMove = new Lifetime(1);
+    this.lastShoot = new Lifetime(1);
+
+    this.cooldown = new Lifetime(500);
 
     this.motion = new Motion();
     this.moving = false;
@@ -40,11 +46,18 @@ Personnage.prototype.onKeyEvent = function(event, toSet) {
         case 40: this.motion.moveDown  = toSet; break; // Down
         case 39: this.motion.moveRight = toSet; break; // Right
 
-        case 65: this.action.keyA = toSet; break; // A key pressed
+//        case 65: this.action.keyA = toSet; break; // A key pressed
+        case 65: this.action = toSet; break; // A key pressed
     }
     if (currentDirection != this.motion.direction())
     {
-        this.socket.emit("move", this.id, this.sphere.mesh.position.x, this.sphere.mesh.position.y, this.motion.direction());
+        this.toMove = true;
+//        this.socket.emit("move", this.id, this.sphere.mesh.position.x, this.sphere.mesh.position.y, this.motion.direction());
+    }
+    if (this.action && this.cooldown.lifeEnds()) {
+        this.toShoot = true;
+//        this.socket.emit("shoot", this.id, this.sphere.mesh.position.x, this.sphere.mesh.position.y, this.motion.direction());
+        this.cooldown = new Lifetime(500);
     }
 }
 

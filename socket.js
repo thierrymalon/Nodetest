@@ -96,19 +96,32 @@ module.exports = function(io) {
 
     var map = new Map();
     map.generateTest1();
+    var kk = 0;
     var id = 1;
     var NB_MAX = 50;
+    var NB_VISU = 500;
     var connectes = new Array(NB_MAX);
     var socketIds = new Array(NB_MAX);
     var xs = new Array(NB_MAX);
     var ys = new Array(NB_MAX);
     var colors = new Array(NB_MAX);
+    var sortsId = new Array(NB_VISU);
+    var xss = new Array(NB_VISU);
+    var yss = new Array(NB_VISU);
+    var directions = new Array(NB_VISU);
 
     for (var i = 0; i < NB_MAX; i++) {
         connectes[i] = false;
         xs[i] = 0;
         ys[i] = 0;
         colors[i] = 0xff0000;
+    }
+
+    for (var i = 0; i < NB_VISU; i++) {
+        sortsId[i] = 0;
+        xss[i] = 0;
+        yss[i] = 0;
+        directions[i] = 0;
     }
 
     io.on('connection', function(socket) {
@@ -133,15 +146,12 @@ module.exports = function(io) {
             while (map.cases.get(yp,xp)) {
                 xp = 1+Math.round(Math.random()*15);
                 yp = 1+Math.round(Math.random()*15);
-                console.log("xp = " + xp + " , yp = " + yp);
             }
 
             xp = 100*xp+50;
             yp = 100*yp+50;
 
-            console.log("ID = " + id + " " + colorPerso);
 
-            console.log("Socket ID is " + id + " / " + socket.id + " IPAddress: " + socket.handshake.address);
 
             socket.emit("msg", id, colorPerso, xp, yp, connectes, xs, ys, colors);
             socket.broadcast.emit("other", id, xp, yp, colorPerso);
@@ -180,5 +190,16 @@ module.exports = function(io) {
             xs[id] = x;
             ys[id] = y;
         });
+
+        socket.on("shoot", function(id, x, y, direction) {
+            socket.emit("shoot", id, x, y, direction, kk);
+            socket.broadcast.emit("shoot", id, x, y, direction, kk);
+            sortsId[kk] = id;
+            xss[kk] = x;
+            yss[kk] = y;
+            directions[kk] = direction;
+            kk = (kk+1)%500;
+        });
+
     });
 }

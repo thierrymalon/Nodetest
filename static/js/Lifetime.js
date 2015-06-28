@@ -12,15 +12,15 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 var Lifetime = function(timeToLive) {
-    this.dateOfBirth = Date.getTime();
+    this.dateOfBirth = new Date().getTime();
     this.timeToLive = timeToLive;
     this.alive = true;
 }
 
 Lifetime.prototype.timeLived = function() {
-    return Date.getTime()-this.dateOfBirth;
+    return (new Date().getTime())-this.dateOfBirth;
 }
 
 Lifetime.prototype.lifeEnds = function() {
-    return Date.getTime()-this.dateOfBirth >= this.timeToLive;
+    return (new Date().getTime())-this.dateOfBirth >= this.timeToLive;
 }
