@@ -55,6 +55,7 @@ Personnage.prototype.onKeyEvent = function(event, toSet) {
 //        this.socket.emit("move", this.id, this.sphere.mesh.position.x, this.sphere.mesh.position.y, this.motion.direction());
     }
     if (this.action && this.cooldown.lifeEnds()) {
+        console.log("koko");
         this.toShoot = true;
 //        this.socket.emit("shoot", this.id, this.sphere.mesh.position.x, this.sphere.mesh.position.y, this.motion.direction());
         this.cooldown = new Lifetime(500);
